@@ -11,7 +11,7 @@
 #  events = ['cycles', 'cache-misses']
 #  app.stat(repeat, events)
 #  print app.cycles(),' +- ',app.cycles_stdev()
-#  print app.cache_misses(),' +- ',app.cache_misses_stdev()
+#  print app.cache_misses()
 #
 # Plugin: parses the output of a specific benchmark, returns a dictionary
 # with data to be used for statistics later, will be combined with the perf
@@ -39,28 +39,26 @@ class PerfData:
         self.ext = dict()
         self.raw = None
 
-    def set_result(self, results):
-        """Set raw output to be parsed"""
-        self.raw = results.decode('utf-8')
-        self.parse()
-
-    def get_value(self, key):
-        """ Get the value of an event or data"""
-        if self.data[key]:
-            return self.data[key]
-        if self.ext and self.ext[key]:
-            return self.ext[key]
-        return ''
-
-    def parse(self):
+    def parse(self, results):
         """Parses the raw output, sets fields"""
+        if isinstance(results, bytes):
+            self.raw = results.decode('utf-8')
+        else:
+            self.raw = results
         if not self.raw:
             return
-
         for field, regex in self.fields.items():
             match = re.search(regex, self.raw)
             if match:
                 self.data[field] = match.group(1)
+
+    def get_value(self, key):
+        """ Get the value of an event or data"""
+        if self.data and self.data[key]:
+            return self.data[key]
+        if self.ext and self.ext[key]:
+            return self.ext[key]
+        return ''
 
     def append(self, data):
         """Append external data"""
@@ -126,7 +124,7 @@ class LinuxPerf:
             results = self.plugin.parse(self.output)
             self.data.append(results)
         # Now, parses the perf output
-        self.data.set_result(self.perfdata)
+        self.data.parse(self.perfdata)
 
     def get_value(self, key):
         """Gets a key from PerfData"""
