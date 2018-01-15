@@ -1,21 +1,19 @@
-#!/usr/bin/env python3
-"""Linux Tools' Perf wrapper"""
+"""
+ Linux Tools' Perf wrapper
 
-# Module: linux_perf
-# Purpose: Core module, includes all others
-#
-# Usage:
-#  app = LinuxPerf(['myapp', '-flag', 'etc'])
-#  app.append_argument('-new_flag')
-#  repeat = 5
-#  events = ['cycles', 'cache-misses']
-#  app.stat(repeat, events)
-#  print app.cycles(),' +- ',app.cycles_stdev()
-#  print app.cache_misses()
-#
-# Plugin: parses the output of a specific benchmark, returns a dictionary
-# with data to be used for statistics later, will be combined with the perf
-# data
+ Usage:
+  app = LinuxPerf(['myapp', '-flag', 'etc'])
+  app.append_argument('-new_flag')
+  repeat = 5
+  events = ['cycles', 'cache-misses']
+  app.stat(repeat, events)
+  print app.cycles(),' +- ',app.cycles_stdev()
+  print app.cache_misses()
+
+ Plugin: parses the output of a specific benchmark, returns a dictionary
+ with data to be used for statistics later, will be combined with the perf
+ data
+"""
 
 import subprocess
 import re

@@ -1,14 +1,13 @@
-#!/usr/bin/env python3
-"""Lulesh output parser"""
+"""
+ Lulesh output parser
+ Purpose: Parses Lulesh output, provide a dictionary, plugin for linux_perf
 
-# Module: lulesh
-# Purpose: Parses Lulesh output, provide a dictionary, plugin for linux_perf
-#
-# Usage:
-#  lul = LuleshPerf()
-#  app = LinuxPerf(['lulesh2.0', '-flag', 'etc'], lul)
-#  app.stat()
-#  print app.cycles()
+ Usage:
+  lul = LuleshPerf()
+  app = LinuxPerf(['lulesh2.0', '-flag', 'etc'], lul)
+  app.stat()
+  print app.cycles()
+"""
 
 import re
 
