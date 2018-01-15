@@ -36,6 +36,7 @@ class PerfData:
         self.data = dict()
         self.ext = dict()
         self.raw = None
+        self.name = None
 
     def parse(self, results):
         """Parses the raw output, sets fields"""
@@ -63,6 +64,10 @@ class PerfData:
         """Append external data"""
         if isinstance(data, dict):
             self.ext.update(data)
+
+    def set_name(self, name):
+        """Sets the log name"""
+        self.name = name
 
 class LinuxPerf:
     """Main class, calls perf stat with some options, saves output for plugins
