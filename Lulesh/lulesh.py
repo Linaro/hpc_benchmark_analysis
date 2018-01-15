@@ -38,11 +38,12 @@ class LuleshPerf:
         else:
             self.raw = results
         if not self.raw:
-            return
+            return None
         for field, regex in self.fields.items():
             match = re.search(regex, self.raw)
             if match:
                 self.data[field] = match.group(1)
+        return self.data
 
     def get_value(self, key):
         """ Get the value of an event or data"""

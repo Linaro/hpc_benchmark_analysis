@@ -24,13 +24,13 @@ class PerfData:
         # Hard-coded list of perf events plus other data it spews
         # well, the ones we support at least
         self.fields = {
-            'instructions' : r'instructions: ([\d]+)',
-            'cycles' : r'cycles: (\d+)',
-            'cpu-migrations' : r'cpu-migrations: (\d+)',
-            'context-switches' : r'context-switches: (\d+)',
-            'page-faults' : r'page-faults: (\d+)',
-            'branches' : r'branches: (\d+)',
-            'branch-misses' : r'branch-misses: (\d+)',
+            'instructions' : r'instructions[:u]* ([\d]+)',
+            'cycles' : r'cycles[:u]* (\d+)',
+            'cpu-migrations' : r'cpu-migrations[:u]* (\d+)',
+            'context-switches' : r'context-switches[:u]* (\d+)',
+            'page-faults' : r'page-faults[:u]* (\d+)',
+            'branches' : r'branches[:u]* (\d+)',
+            'branch-misses' : r'branch-misses[:u]* (\d+)',
             'elapsed' : r'(\d+\.\d+)\s+seconds time elapsed'
         }
         self.data = dict()
@@ -44,24 +44,25 @@ class PerfData:
         else:
             self.raw = results
         if not self.raw:
-            return
+            return None
         for field, regex in self.fields.items():
             match = re.search(regex, self.raw)
             if match:
                 self.data[field] = match.group(1)
+        return self.data
 
     def get_value(self, key):
         """ Get the value of an event or data"""
-        if self.data and self.data[key]:
+        if self.data and key in self.data:
             return self.data[key]
-        if self.ext and self.ext[key]:
+        if self.ext and key in self.ext:
             return self.ext[key]
         return ''
 
     def append(self, data):
         """Append external data"""
         if isinstance(data, dict):
-            self.ext += data
+            self.ext.update(data)
 
 class LinuxPerf:
     """Main class, calls perf stat with some options, saves output for plugins
@@ -117,12 +118,13 @@ class LinuxPerf:
 
     def parse(self):
         """Parses the output of perf stat"""
-        # First, passes the output for the plugin to fill in its own data
+        # First, parses the output for the plugin to fill in its own data
         if self.plugin:
             results = self.plugin.parse(self.output)
             self.data.append(results)
         # Now, parses the perf output
         self.data.parse(self.perfdata)
+        return self.data
 
     def get_value(self, key):
         """Gets a key from PerfData"""
@@ -131,3 +133,8 @@ class LinuxPerf:
     def get_raw(self):
         """Gets raw results from out and err"""
         return (self.output + self.perfdata).decode('utf-8')
+
+    def set_raw(self, raw):
+        """Sets raw results onto both out and err"""
+        self.output = raw
+        self.perfdata = raw

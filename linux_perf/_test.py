@@ -11,11 +11,11 @@ def _test_simple():
     date.parse()
 
     inst = int(date.get_value('instructions'))
-    assert inst > 100000, 'Number of instructions too low'
+    assert inst > 10000, 'Number of instructions too low'
     assert inst < 1000000, 'Number of instructions too high'
 
     branches = int(date.get_value('branches'))
-    assert branches > 100000, 'Number of branches too low'
+    assert branches > 10000, 'Number of branches too low'
     assert branches < 1000000, 'Number of branches too high'
 
     cpum = int(date.get_value('cpu-migrations'))
