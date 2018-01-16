@@ -3,6 +3,7 @@
 """Testing script for Lulesh functionality"""
 
 import os
+from pathlib import Path
 from lulesh import LuleshPerf
 
 RAW = """Running problem size 10^3 per domain until completion
@@ -58,10 +59,11 @@ def _test_lulesh():
 def _test_reading_files():
     print("Test files: ", end='')
     lul = LuleshPerf()
-    root = os.path.dirname(__file__) + "/x86_64"
+    root = os.path.dirname(os.path.abspath(__file__)) + "/x86_64"
     for _, _, files in os.walk(root):
         for logfile in files:
-            lul.parse(logfile)
+            logfile = root + '/' + logfile
+            lul.parse(Path(logfile).read_text())
 
             size = int(lul.get_value('ProblemSize'))
             assert size == 50, 'Wrong size'
@@ -70,9 +72,9 @@ def _test_reading_files():
             assert elements == 125000, 'Wrong number of elements'
 
             fom = float(lul.get_value('FOM'))
-            assert (fom > 900 and fom < 2500), 'Wrong range for FOM'
+            assert (fom > 950 and fom < 2600), 'Wrong range for FOM'
 
-            _, _, _, actual_threads = (logfile.split('.')[0]).split('-')
+            actual_threads = int((logfile.replace('.log', '')).split('-')[3])
             threads = int(lul.get_value('Threads'))
             assert threads == actual_threads, "Wrong number of threads"
 
