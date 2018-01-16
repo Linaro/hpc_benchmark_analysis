@@ -51,8 +51,14 @@ def _test_lulesh():
     energy = float(lul.get_value('FinalEnergy'))
     assert energy == 2.720531e+04, 'Wrong energy'
 
-    diff = float(lul.get_value('MaxRelDiff'))
-    assert diff == 1.566182e-14, 'Wrong difference'
+    diff1 = float(lul.get_value('MaxAbsDiff'))
+    assert diff1 == 1.591616e-12, 'Wrong MaxAbsDiff'
+
+    diff2 = float(lul.get_value('TotalAbsDiff'))
+    assert diff2 == 1.948782e-11, 'Wrong TotalAbsDiff'
+
+    diff3 = float(lul.get_value('MaxRelDiff'))
+    assert diff3 == 1.566182e-14, 'Wrong MaxRelDiff'
 
     print("PASS")
 
