@@ -24,13 +24,13 @@ class PerfData:
         # Hard-coded list of perf events plus other data it spews
         # well, the ones we support at least
         self.fields = {
-            'instructions' : r'instructions[:u]* ([\d]+)',
-            'cycles' : r'cycles[:u]* (\d+)',
-            'cpu-migrations' : r'cpu-migrations[:u]* (\d+)',
-            'context-switches' : r'context-switches[:u]* (\d+)',
-            'page-faults' : r'page-faults[:u]* (\d+)',
-            'branches' : r'branches[:u]* (\d+)',
-            'branch-misses' : r'branch-misses[:u]* (\d+)',
+            'instructions' : r'([\d,]+)\s+instructions',
+            'cycles' : r'([\d,]+)\s+cycles',
+            'cpu-migrations' : r'([\d,]+)\s+cpu-migrations',
+            'context-switches' : r'([\d,]+)\s+context-switches',
+            'page-faults' : r'([\d,]+)\s+page-faults',
+            'branches' : r'([\d,]+)\s+branches',
+            'branch-misses' : r'([\d,]+)\s+branch-misses',
             'elapsed' : r'(\d+\.\d+)\s+seconds time elapsed'
         }
         self.data = dict()
@@ -49,7 +49,8 @@ class PerfData:
         for field, regex in self.fields.items():
             match = re.search(regex, self.raw)
             if match:
-                self.data[field] = match.group(1)
+                # hardcoded clear up, better to add this to fields
+                self.data[field] = match.group(1).replace(',', '')
         return self.data
 
     def get_value(self, key):
@@ -98,7 +99,7 @@ class LinuxPerf:
 
     def stat(self, repeat=1, events=None):
         """Runs perf stat on the process, saving the output"""
-        call = ['perf', 'stat', '-v']
+        call = ['perf', 'stat']
         # Repeat the run N times, reports stdev
         if repeat > 1:
             call.extend(['-r', repeat])

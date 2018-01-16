@@ -1,0 +1,15 @@
+ Performance counter stats for './lulesh2.0-gcc6-native -s 50':
+
+     266882.266468      task-clock (msec)         #    1.979 CPUs utilized          
+             2,341      context-switches          #    0.009 K/sec                  
+                 0      cpu-migrations            #    0.000 K/sec                  
+        32,372,398      page-faults               #    0.121 M/sec                  
+   821,203,121,599      cycles                    #    3.077 GHz                    
+   402,944,691,276      stalled-cycles-frontend   #   49.07% frontend cycles idle   
+ 1,412,756,278,127      instructions              #    1.72  insn per cycle         
+                                                  #    0.29  stalled cycles per insn
+    68,781,163,317      branches                  #  257.721 M/sec                  
+       160,169,961      branch-misses             #    0.23% of all branches        
+
+     134.866866939 seconds time elapsed
+
