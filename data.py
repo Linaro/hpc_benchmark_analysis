@@ -42,7 +42,9 @@ class Data:
     def summary(self):
         """ Print a summary of the data"""
         for run in self.logs:
-            print("Run: " + run)
             for log in self.logs[run]:
+                # Hardcode to get all keys for now
                 for key, val in log.data.items():
+                    print(key + " = " + val)
+                for key, val in log.ext.items():
                     print(key + " = " + val)
