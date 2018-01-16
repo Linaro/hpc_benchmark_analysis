@@ -43,8 +43,10 @@ class Data:
         """ Print a summary of the data"""
         for run in self.logs:
             for log in self.logs[run]:
+                print("Logfile: " + log.name)
                 # Hardcode to get all keys for now
                 for key, val in log.data.items():
                     print(key + " = " + val)
                 for key, val in log.ext.items():
                     print(key + " = " + val)
+                print('')
