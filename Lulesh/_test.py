@@ -35,7 +35,7 @@ Grind time (us/z/c)  =  1.0388182 (per dom)  ( 1.0388182 overall)
 FOM                  =  962.63236 (z/s)"""
 
 def _test_lulesh():
-    print("Test Lulesh: ", end='')
+    print("Lulesh Test / Simple: ", end='')
     lul = LuleshPerf()
     lul.parse(RAW)
 
@@ -63,7 +63,7 @@ def _test_lulesh():
     print("PASS")
 
 def _test_reading_files():
-    print("Test files: ", end='')
+    print("Lulesh Test / Files: ", end='')
     lul = LuleshPerf()
     root = os.path.dirname(os.path.abspath(__file__)) + "/x86_64"
     for _, _, files in os.walk(root):
@@ -86,6 +86,20 @@ def _test_reading_files():
 
     print("PASS")
 
+def _test_errors():
+    print("Lulesh Test / Errors: ", end='')
+    lul = LuleshPerf()
+
+    lul.parse(['not', 'a', 'str'])
+    assert not lul.data, "Should not have parsed list"
+
+    lul.parse('FOM = 123')
+    assert int(lul.get_value('FOM')) == 123, "Should have FOM"
+    assert not lul.get_value('Grind'), "Should not have Grind"
+
+    print("PASS")
+
 # Tests
 _test_lulesh()
 _test_reading_files()
+_test_errors()

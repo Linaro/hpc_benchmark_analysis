@@ -40,11 +40,9 @@ class PerfData:
 
     def parse(self, results):
         """Parses the raw output, sets fields"""
-        if isinstance(results, bytes):
-            self.raw = results.decode('utf-8')
-        else:
+        if isinstance(results, str):
             self.raw = results
-        if not self.raw:
+        else:
             return None
         for field, regex in self.fields.items():
             match = re.search(regex, self.raw)
@@ -68,7 +66,10 @@ class PerfData:
 
     def set_name(self, name):
         """Sets the log name"""
-        self.name = name
+        if isinstance(name, str):
+            self.name = name
+        else:
+            self.name = None
 
 class LinuxPerf:
     """Main class, calls perf stat with some options, saves output for plugins
@@ -78,7 +79,7 @@ class LinuxPerf:
     def __init__(self, program=None, plugin=None):
         # list of arguments
         self.program = list()
-        if isinstance(program, list):
+        if isinstance(program, list) and program:
             self.program.extend(program)
         # external plugin, benchmark specific
         self.plugin = plugin
@@ -119,8 +120,8 @@ class LinuxPerf:
         call.extend(self.program)
         # Call and collect output
         result = subprocess.run(call, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        self.output = result.stdout
-        self.perfdata = result.stderr
+        self.output = result.stdout.decode('utf-8')
+        self.perfdata = result.stderr.decode('utf-8')
 
     def parse(self):
         """Parses the output of perf stat"""
@@ -138,7 +139,7 @@ class LinuxPerf:
 
     def get_raw(self):
         """Gets raw results from out and err"""
-        return (self.output + self.perfdata).decode('utf-8')
+        return self.output + self.perfdata
 
     def set_raw(self, raw):
         """Sets raw results onto both out and err"""

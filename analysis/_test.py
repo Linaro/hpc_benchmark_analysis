@@ -5,7 +5,7 @@
 from outlier import Outliers
 
 def _test_outlier_simple():
-    print("Test Outlier simple: ", end='')
+    print("Outlier Test / Simple: ", end='')
 
     # A random gausian distribution of 8 numbers + 2 outliers
     data = [-0.17924, 0.13555605, -0.71446764, -0.12500689,

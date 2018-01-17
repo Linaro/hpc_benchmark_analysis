@@ -4,7 +4,7 @@
 
 import os
 from pathlib import Path
-from linux_perf import LinuxPerf
+from linux_perf import LinuxPerf, PerfData
 
 RAW = """
  Performance counter stats for 'date':
@@ -22,7 +22,7 @@ RAW = """
 """
 
 def _test_raw():
-    print("Test Raw: ", end='')
+    print("LinuxPerf Test / Raw: ", end='')
     raw = LinuxPerf()
     raw.set_raw(RAW)
     raw.parse()
@@ -39,7 +39,7 @@ def _test_raw():
     print("PASS")
 
 def _test_simple_exec():
-    print("Test Simple Exec: ", end='')
+    print("LinuxPerf Test / Simple Exec: ", end='')
     date = LinuxPerf(['date'])
     date.stat()
     date.parse()
@@ -59,7 +59,7 @@ def _test_simple_exec():
     print("PASS")
 
 def _test_reading_files():
-    print("Test Reading Files: ", end='')
+    print("LinuxPerf Test / Reading Files: ", end='')
     root = os.path.dirname(os.path.abspath(__file__)) + "/x86_64"
     for _, _, files in os.walk(root):
         for logfile in files:
@@ -81,7 +81,46 @@ def _test_reading_files():
 
     print("PASS")
 
+def _test_errors():
+    print("LinuxPerf Test / Errors: ", end='')
+    ## PerfData
+    pdata = PerfData()
+    result = pdata.parse(['123 instructions', '321 cycles'])
+    assert not result, "Shouldn't have parsed list"
+
+    pdata.append(['123 instructions', '321 cycles'])
+    assert not pdata.ext, "Shouldn't have appended list"
+
+    pdata.set_name(['123 instructions', '321 cycles'])
+    assert not pdata.name, "Shouldn't have used list as name"
+
+    ## LinuxPerf
+    lperf = LinuxPerf()
+    assert not lperf.program, "Default program should be empty"
+
+    lperf.append_argument('foo')
+    assert lperf.program == ['foo'], "New argument should be 'foo'"
+
+    lperf.append_argument(['bar', 'baz'])
+    assert lperf.program == ['foo', 'bar', 'baz'], "Full argument should be 'foo', 'bar', 'baz'"
+
+    lperf.set_raw('123 456 789')
+    lperf.parse()
+    assert not lperf.get_value('instructions'), "Bad input shouldn't parse nor fail"
+
+    lperf.set_raw('123 instructions')
+    lperf.parse()
+    assert int(lperf.get_value('instructions')) == 123, "Should have had instructions"
+    assert not lperf.get_value('cycles'), "Should not have had cycles"
+
+    assert lperf.get_raw(), "Should have some raw data"
+    lperf.set_raw('')
+    assert not lperf.get_raw(), "Should have cleared raw data"
+
+    print("PASS")
+
 # Tests
 _test_raw()
 _test_simple_exec()
 _test_reading_files()
+_test_errors()

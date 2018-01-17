@@ -33,11 +33,9 @@ class LuleshPerf:
 
     def parse(self, results):
         """Parses raw output"""
-        if isinstance(results, bytes):
-            self.raw = results.decode('utf-8')
-        else:
+        if isinstance(results, str):
             self.raw = results
-        if not self.raw:
+        else:
             return None
         for field, regex in self.fields.items():
             match = re.search(regex, self.raw)
@@ -47,6 +45,6 @@ class LuleshPerf:
 
     def get_value(self, key):
         """ Get the value of an event or data"""
-        if self.data and self.data[key]:
+        if self.data and key in self.data:
             return self.data[key]
         return ''
