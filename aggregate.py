@@ -18,40 +18,55 @@
     - Curve fit data against numeric categories (1, 2, 4, 8, ...)
     - Calculate distance to "perfect scalability"
     - Compare fit with other categories
+    - Outlier can spot best / worst, OMP cost? CPU migrations?
+  * Detecting order of results
+    - Put results in order, match expectations (O1, O2, O3)
+    - Linear fit outliers can tell "best option" (better results for same effort)
+    - Maybe we should also track compilation times?
   * Identify differences between runs
     - Compare every data point to similar nodes in different categories
+    - Different compiler, same options
+    - Outliers can show best / worst case to compare to others
   * Statisisc on comparisons (above):
     - Only two: return difference, mark if outside threshold
     - 3 ~ 4: return mean / stdev
     - 5+: return mean / stdev and outliers
+  * Issues to look for
+    - Comparing two compilers across multiple versions may skew data, increasing
+      spread and spoiling outlier detection (ex. 1-1-2 vs 3-4-4) -> K-Means
+    - Unlike threads, compiler options are hard to know the expected "order",
+      so comparing the order between compilers is a way to detect poor passes
+    - Knowing which analysis to do based on positional category is bad. Create
+      an option to specify that, ex. --analysis=cluster,order,gaus,fit to do,
+      from top to bottom category, k-means clustering (assuming multiple groups),
+      ordering and comparing order across higher categories, take average/dev and
+      spot outliers and thresholds, and finally curve-fit to whatever the category
+      is (requiring it to be numeric).
 
  Example:
-  * Lulesh -- gcc  -- O2 -- 1 (core)
-           |             '- 2 (cores)
-           |             '- 4 (cores)
-           |       '- O3 -- 1 (core)
-           |             '- 2 (cores)
-           |             '- 4 (cores)
-           |       '- .. -- 1 (core)
-           |             '- 2 (cores)
-           |             '- 4 (cores)
-           -- llvm -- O2 -- 1 (core)
-                         '- 2 (cores)
-                         '- 4 (cores)
-                   '- O3 -- 1 (core)
-                         '- 2 (cores)
-                         '- 4 (cores)
-                   '- .. -- 1 (core)
-                         '- 2 (cores)
-                         '- 4 (cores)
+  * Lulesh -.- gcc -.- O2 .- 1 (core)
+            |       |     '- 2 (cores)
+            |       |     '- 4 (cores)
+            |       '- O3 .- 1 (core)
+            |       |     '- 2 (cores)
+            |       |     '- 4 (cores)
+            |       '- .. .- 1 (core)
+            |             '- 2 (cores)
+            |             '- 4 (cores)
+            |
+            '- llvm .- O2 .- 1 (core)
+                    |     '- 2 (cores)
+                    |     '- 4 (cores)
+                    '- O3 .- 1 (core)
+                    |     '- 2 (cores)
+                    |     '- 4 (cores)
+                    '- .. .- 1 (core)
+                          '- 2 (cores)
+                          '- 4 (cores)
+
   * Comparisons:
     * gcc  - O2: 1 vs 2 vs 4 (curve fit + correlation)
-    * gcc  - O3: 1 vs 2 vs 4 (curve fit + correlation)
-    * llvm - O2: 1 vs 2 vs 4 (curve fit + correlation)
-    * llvm - O3: 1 vs 2 vs 4 (curve fit + correlation)
-    * gcc  - O2 vs O3 vs ... (difference + outlier)
-    * llvm - O2 vs O3 vs ... (difference + outlier)
-    * gcc+O2 vs llvm+O2 vs ...+O2 (difference + outlier)
+    * gcc  - O2 vs O3 vs ... (ordering + line fit + distance outlier)
     * gcc+O3 vs llvm+O3 vs ...+O3 (difference + outlier)
 """
 import sys
