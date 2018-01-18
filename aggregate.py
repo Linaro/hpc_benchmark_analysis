@@ -14,7 +14,45 @@
   * Create a plugin architecture / configuration file that will have metadata
     about the specific benchmark
   * Understand what are the distributions (normal, exp, scaled) for each data
-  * Calculate correlation coeficients, detect outliers, etc.
+  * Calculate correlation coeficients
+    - Curve fit data against numeric categories (1, 2, 4, 8, ...)
+    - Calculate distance to "perfect scalability"
+    - Compare fit with other categories
+  * Identify differences between runs
+    - Compare every data point to similar nodes in different categories
+  * Statisisc on comparisons (above):
+    - Only two: return difference, mark if outside threshold
+    - 3 ~ 4: return mean / stdev
+    - 5+: return mean / stdev and outliers
+
+ Example:
+  * Lulesh -- gcc  -- O2 -- 1 (core)
+           |             '- 2 (cores)
+           |             '- 4 (cores)
+           |       '- O3 -- 1 (core)
+           |             '- 2 (cores)
+           |             '- 4 (cores)
+           |       '- .. -- 1 (core)
+           |             '- 2 (cores)
+           |             '- 4 (cores)
+           -- llvm -- O2 -- 1 (core)
+                         '- 2 (cores)
+                         '- 4 (cores)
+                   '- O3 -- 1 (core)
+                         '- 2 (cores)
+                         '- 4 (cores)
+                   '- .. -- 1 (core)
+                         '- 2 (cores)
+                         '- 4 (cores)
+  * Comparisons:
+    * gcc  - O2: 1 vs 2 vs 4 (curve fit + correlation)
+    * gcc  - O3: 1 vs 2 vs 4 (curve fit + correlation)
+    * llvm - O2: 1 vs 2 vs 4 (curve fit + correlation)
+    * llvm - O3: 1 vs 2 vs 4 (curve fit + correlation)
+    * gcc  - O2 vs O3 vs ... (difference + outlier)
+    * llvm - O2 vs O3 vs ... (difference + outlier)
+    * gcc+O2 vs llvm+O2 vs ...+O2 (difference + outlier)
+    * gcc+O3 vs llvm+O3 vs ...+O3 (difference + outlier)
 """
 import sys
 import os
@@ -53,6 +91,13 @@ def process_runs(name, log_dirs):
         process_logs(log_dir, data)
     return data
 
+def compare(data):
+    """Compare all results together, mark exceptions"""
+    # Find th leaf nodes (perf/bench data)
+    # Find their equivalent leaf nodes in other categories
+    # Spot outliers, curve fits, significant differences
+    return data
+
 def syntax():
     """Syntax"""
     print("Syntax: aggregate.py benchname <logs_dir_arch1> <logs_dir_arch2> ...")
@@ -76,6 +121,9 @@ def main():
     # Process all logs
     data = process_runs(benchname, log_dirs)
     data.summary()
+    # Perform all comparisons
+    compare(data)
+    # Dump significant data (higher than threshold)
 
 if __name__ == "__main__":
     main()
