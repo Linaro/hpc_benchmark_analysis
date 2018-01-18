@@ -16,10 +16,11 @@
   * Leaf nodes represent data, branches are categories, root node is benchmark name
     - Example: { gcc, llvm } - { O2, O3 } - [ elapsed, cache-misses, ... ]
   * If using multiple log dirs, naming convention needs to be the same
+
 """
 
 class Data:
-    """Blerg"""
+    """Class that holds categories and log data in a hierarchical way"""
     def __init__(self, name):
         self.name = name
         self.logs = dict()
