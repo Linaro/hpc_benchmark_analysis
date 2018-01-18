@@ -1,0 +1,44 @@
+Running problem size 50^3 per domain until completion
+Num processors: 1
+Num threads: 2
+Total number of elements: 125000
+
+To run other sizes, use -s <integer>.
+To run a fixed number of iterations, use -i <integer>.
+To run a more or less balanced region set, use -b <integer>.
+To change the relative costs of regions, use -c <integer>.
+To print out progress, use -p
+To write an output file for VisIt, use -v
+See help (-h) for more options
+
+Run completed:  
+   Problem size        =  50 
+   MPI tasks           =  1 
+   Iteration count     =  1662 
+   Final Origin Energy = 5.124778e+05 
+   Testing Plane 0 of Energy Array on rank 0:
+        MaxAbsDiff   = 2.182787e-10
+        TotalAbsDiff = 3.984384e-09
+        MaxRelDiff   = 1.209273e-12
+
+
+Elapsed time         =     134.90 (s)
+Grind time (us/z/c)  = 0.64934706 (per dom)  (0.64934706 overall)
+FOM                  =  1540.0085 (z/s)
+
+
+ Performance counter stats for './lulesh2.0-gcc6-generic -s 50':
+
+     267802.809420      task-clock (msec)         #    1.984 CPUs utilized          
+             1,996      context-switches          #    0.007 K/sec                  
+                 0      cpu-migrations            #    0.000 K/sec                  
+        32,372,397      page-faults               #    0.121 M/sec                  
+   809,061,374,646      cycles                    #    3.021 GHz                    
+   388,953,723,380      stalled-cycles-frontend   #   48.07% frontend cycles idle   
+ 1,412,908,506,093      instructions              #    1.75  insn per cycle         
+                                                  #    0.28  stalled cycles per insn
+    68,384,968,715      branches                  #  255.356 M/sec                  
+       144,985,815      branch-misses             #    0.21% of all branches        
+
+     134.957165874 seconds time elapsed
+

@@ -1,0 +1,44 @@
+Running problem size 50^3 per domain until completion
+Num processors: 1
+Num threads: 8
+Total number of elements: 125000
+
+To run other sizes, use -s <integer>.
+To run a fixed number of iterations, use -i <integer>.
+To run a more or less balanced region set, use -b <integer>.
+To change the relative costs of regions, use -c <integer>.
+To print out progress, use -p
+To write an output file for VisIt, use -v
+See help (-h) for more options
+
+Run completed:  
+   Problem size        =  50 
+   MPI tasks           =  1 
+   Iteration count     =  1662 
+   Final Origin Energy = 5.124778e+05 
+   Testing Plane 0 of Energy Array on rank 0:
+        MaxAbsDiff   = 2.182787e-10
+        TotalAbsDiff = 3.984384e-09
+        MaxRelDiff   = 1.209273e-12
+
+
+Elapsed time         =      94.43 (s)
+Grind time (us/z/c)  = 0.45455607 (per dom)  (0.45455607 overall)
+FOM                  =  2199.9486 (z/s)
+
+
+ Performance counter stats for './lulesh2.0-llvm4-generic -s 50':
+
+     755445.550560      task-clock (msec)         #    7.998 CPUs utilized          
+             3,065      context-switches          #    0.004 K/sec                  
+                 8      cpu-migrations            #    0.000 K/sec                  
+        32,371,100      page-faults               #    0.043 M/sec                  
+ 2,166,787,592,967      cycles                    #    2.868 GHz                    
+ 1,623,096,748,128      stalled-cycles-frontend   #   74.91% frontend cycles idle   
+ 1,608,617,246,242      instructions              #    0.74  insn per cycle         
+                                                  #    1.01  stalled cycles per insn
+   124,942,422,702      branches                  #  165.389 M/sec                  
+       231,078,794      branch-misses             #    0.18% of all branches        
+
+      94.459402500 seconds time elapsed
+
