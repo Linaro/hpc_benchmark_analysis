@@ -38,7 +38,6 @@ def process(log_dir, log_file, data):
 
 def process_logs(log_dir, data):
     """Process all log files in directory, update Data"""
-    data.add_run(log_dir)
     # Unused root, dirs, only reading files
     for _, _, files in os.walk(log_dir):
         for filename in files:

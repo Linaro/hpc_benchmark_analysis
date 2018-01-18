@@ -23,30 +23,59 @@ class Data:
     def __init__(self, name):
         self.name = name
         self.logs = dict()
-
-    def add_run(self, rundir):
-        """Add a run to the data"""
-        if not isinstance(rundir, str):
-            raise "A run must be a name"
-        self.logs[rundir] = list()
+        self.categories = 0
 
     def add_log(self, run, log, data):
         """Add a log file to a run"""
+
+        # Validate input
+        if not isinstance(run, str):
+            raise "A run must be a str"
         if not isinstance(log, str):
-            raise "A log must be a name"
-        if not self.logs[run]:
-            self.add_run(run)
+            raise "A log must be a str"
+        cats = log.replace('.log', '').split('-')
+        if not self.categories and len(cats) == 1:
+            print("Warning: Mo '-' separators in lognames. Using one category")
+        if self.categories and len(cats) != self.categories:
+            raise "Different number of '-' separators in log file names"
+
+        # Add runs / logs to the structure
+        self.categories = len(cats)
+        if run not in self.logs:
+            self.logs[run] = dict()
+
+        # For each category, build the tree
         data.set_name(log)
-        self.logs[run].append(data)
+        pointer = self.logs[run] # (chuckle)
+        last = cats[-1]
+        for cat in cats:
+            if cat == last:
+                pointer[cat] = data
+            else:
+                if cat not in pointer:
+                    pointer[cat] = dict()
+                pointer = pointer[cat]
 
     def summary(self):
         """ Print a summary of the data"""
         for run in self.logs:
-            for log in self.logs[run]:
-                print("Logfile: " + log.name)
-                # Hardcode to get all keys for now
-                for key, val in log.data.items():
-                    print(key + " = " + val)
-                for key, val in log.ext.items():
-                    print(key + " = " + val)
-                print('')
+            for cat in self.logs[run]:
+                _summary(self.logs[run][cat], "")
+
+def _summary(data, padding):
+    """Recurse through categories, dump last data"""
+    # Dictionaries are categories
+    if isinstance(data, dict):
+        for cat, _ in data.items():
+            print(padding + cat)
+            _summary(data[cat], padding + "  ")
+
+    # Data elements are leaf nodes
+    else:
+        print(padding + "Logfile: " + data.name)
+        # Hardcode to get all keys for now
+        for key, val in data.data.items():
+            print(padding + key + " = " + val)
+        for key, val in data.ext.items():
+            print(padding + key + " = " + val)
+        print('')
