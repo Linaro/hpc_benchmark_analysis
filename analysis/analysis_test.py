@@ -97,7 +97,7 @@ class TestAnalysis(unittest.TestCase):
         self.assertEqual(linfit.poly[1], 0.0590476190476186)
         self.assertEqual(linfit.poly[0], 0.8997142857142856)
         optimal = xval # linear
-        self.assertEqual(linfit.compare(optimal), 0.21134920634920631)
+        self.assertEqual(linfit.quality(optimal), 0.17173347086126853)
 
         # Quadractic
         quad = [.2, 1.1, 3.98, 8.88, 15.4, 24.2]
@@ -107,10 +107,10 @@ class TestAnalysis(unittest.TestCase):
         self.assertEqual(quadfit.poly[1], -0.03249999999999286)
         self.assertEqual(quadfit.poly[0], 0.9653571428571415)
         optimal = [0, 1, 4, 9, 16, 25]
-        self.assertEqual(quadfit.compare(optimal), 0.3123809523809515)
+        self.assertEqual(quadfit.quality(optimal), 0.11625478316326478)
 
         # Comparison between linear and quad should be bad
-        self.assertEqual(quadfit.compare(xval), 6.459999999999994)
+        self.assertEqual(quadfit.quality(xval), 59.94661192602033)
 
 
 if __name__ == '__main__':
