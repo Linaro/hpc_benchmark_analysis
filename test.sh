@@ -2,11 +2,8 @@
 
 # Horrible test driver, use something decent
 
-# "Unit" tests
-echo " * Unit Tests *"
-for dir in Lulesh linux_perf analysis; do
-  python3 $dir/_test.py
-done
+# Unit tests
+pytest
 
 # "Regression" tests
 echo
