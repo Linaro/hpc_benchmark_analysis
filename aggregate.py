@@ -104,20 +104,20 @@ def process_logs(log_dir, data, plugin):
                 continue
             process(log_dir, filename, data, plugin)
 
-def process_runs(name, log_dirs, plugin):
+def process_runs(name, log_dirs, plugin, data_string):
     """Adjust dictionary, process all logs, return Data"""
-    data = Data(name)
+    data = Data(name, data_string)
     # For each log dir, parse, append to the dictionary
     for log_dir in log_dirs:
         process_logs(log_dir, data, plugin)
     return data
 
-def compare(data, data_string):
+def compare(data):
     """Compare all results together, mark exceptions"""
     # Find th leaf nodes (perf/bench data)
     # Find their equivalent leaf nodes in other categories
     # Spot outliers, curve fits, significant differences
-    return data, data_string
+    return data
 
 def syntax():
     """Syntax"""
@@ -125,7 +125,7 @@ def syntax():
     print(" Options:")
     print("   -p <plugin_name> : Loads class LinuxPerfPlugin in module <plugin_name>")
     print("   -d <data_desc> : Description of the data, in positional order, in log names")
-    print("                    Example: -d threshold=1.0,outlier,cluster=2,fit=2")
+    print("                    Example: -d sep=-,outlier=1.0,cluster=2,fit=2")
     print("                             from lognames <compiler>-<options>-<arch>-<cores>")
     sys.exit(2)
 
@@ -183,11 +183,11 @@ def main():
             syntax()
 
     # Process all logs (with plugins)
-    data = process_runs(benchname, log_dirs, plugin)
+    data = process_runs(benchname, log_dirs, plugin, data_string)
 
     # Perform all comparisons
     data.summary()
-    compare(data, data_string)
+    compare(data)
 
     # Dump significant data (higher than threshold)
 
