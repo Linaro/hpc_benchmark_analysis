@@ -74,7 +74,7 @@ import os
 from pathlib import Path
 from data import Data
 from linux_perf.linux_perf import LinuxPerf
-from Lulesh.lulesh import LuleshPerf
+from lulesh.lulesh import LuleshPerf
 
 def process(log_dir, log_file, data):
     """Process a single log file, using plugins, update Data"""
