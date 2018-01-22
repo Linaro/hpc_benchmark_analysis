@@ -6,6 +6,7 @@ import unittest
 import math
 from outlier import Outliers
 from cluster import Clustering
+from fit import CurveFit
 
 class TestAnalysis(unittest.TestCase):
     """Analysys tests"""
@@ -83,6 +84,34 @@ class TestAnalysis(unittest.TestCase):
 
         self.assertEqual(clusters[0].centre, -0.06231160500000001)
         self.assertEqual(clusters[0].get_outliers(), expected_outliers)
+
+    def test_curve_fit_simple(self):
+        """Curve Fit Test / Simple"""
+
+        # X axis is the same for all
+        xval = [0, 1, 2, 3, 4, 5]
+        # Linear points
+        linear = [.1, .9, 1.85, 2.77, 3.69, 4.54]
+        linfit = CurveFit(xval, linear)
+        linfit.fit()
+        self.assertEqual(linfit.poly[1], 0.0590476190476186)
+        self.assertEqual(linfit.poly[0], 0.8997142857142856)
+        optimal = xval # linear
+        self.assertEqual(linfit.compare(optimal), 0.21134920634920631)
+
+        # Quadractic
+        quad = [.2, 1.1, 3.98, 8.88, 15.4, 24.2]
+        quadfit = CurveFit(xval, quad, 2)
+        quadfit.fit()
+        self.assertEqual(quadfit.poly[2], 0.1921428571428483)
+        self.assertEqual(quadfit.poly[1], -0.03249999999999286)
+        self.assertEqual(quadfit.poly[0], 0.9653571428571415)
+        optimal = [0, 1, 4, 9, 16, 25]
+        self.assertEqual(quadfit.compare(optimal), 0.3123809523809515)
+
+        # Comparison between linear and quad should be bad
+        self.assertEqual(quadfit.compare(xval), 6.459999999999994)
+
 
 if __name__ == '__main__':
     unittest.main()
