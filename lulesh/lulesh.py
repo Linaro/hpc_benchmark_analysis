@@ -11,7 +11,7 @@
 
 import re
 
-class LuleshPerf:
+class LinuxPerfPlugin:
     """Plugin for LinuxPerf, parses Lulesh output, return dictionary"""
     def __init__(self):
         # Hard-coded list of perf events plus other data it spews

@@ -5,7 +5,7 @@
 import unittest
 import os
 from pathlib import Path
-from lulesh import LuleshPerf
+from lulesh import LinuxPerfPlugin
 
 RAW = """Running problem size 10^3 per domain until completion
 Num processors: 1
@@ -40,7 +40,7 @@ class TestLulesh(unittest.TestCase):
 
     def test_lulesh(self):
         """Lulesh Test / Simple"""
-        lul = LuleshPerf()
+        lul = LinuxPerfPlugin()
         lul.parse(RAW)
 
         size = int(lul.get_value('ProblemSize'))
@@ -66,7 +66,7 @@ class TestLulesh(unittest.TestCase):
 
     def test_reading_files(self):
         """Lulesh Test / Files"""
-        lul = LuleshPerf()
+        lul = LinuxPerfPlugin()
         root = os.path.dirname(os.path.abspath(__file__)) + "/x86_64"
         for _, _, files in os.walk(root):
             for logfile in files:
@@ -88,7 +88,7 @@ class TestLulesh(unittest.TestCase):
 
     def test_errors(self):
         """Lulesh Test / Errors"""
-        lul = LuleshPerf()
+        lul = LinuxPerfPlugin()
 
         lul.parse(['not', 'a', 'str'])
         self.assertFalse(lul.data)

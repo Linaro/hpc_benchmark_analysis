@@ -71,17 +71,23 @@
 """
 import sys
 import os
+import importlib
+import getopt
 from pathlib import Path
 from data import Data
 from linux_perf.linux_perf import LinuxPerf
-from lulesh.lulesh import LuleshPerf
 
-def process(log_dir, log_file, data):
+def load_plugin(plugin):
+    """Loads module in plugin/plugin.py and return LinuxPerfClass object"""
+    mod = importlib.import_module(plugin + "." + plugin)
+    return mod.LinuxPerfPlugin()
+
+def process(log_dir, log_file, data, plugin):
     """Process a single log file, using plugins, update Data"""
     # Hardcoded "process" for Lulesh for now
-    plugin = LuleshPerf()
+    plugin = load_plugin(plugin)
     # Create an empty perf, as we won't execute, just parse
-    app = LinuxPerf([''], plugin)
+    app = LinuxPerf(plugin=plugin)
     # Open log file, pass it to LinuxPerf, parse
     raw = Path(log_dir + "/" + log_file).read_text()
     app.set_raw(raw)
@@ -89,55 +95,100 @@ def process(log_dir, log_file, data):
     # Collect parsed data, push into Data
     data.add_log(log_dir, log_file, results)
 
-def process_logs(log_dir, data):
+def process_logs(log_dir, data, plugin):
     """Process all log files in directory, update Data"""
     # Unused root, dirs, only reading files
     for _, _, files in os.walk(log_dir):
         for filename in files:
             if filename.startswith("."):
                 continue
-            process(log_dir, filename, data)
+            process(log_dir, filename, data, plugin)
 
-def process_runs(name, log_dirs):
+def process_runs(name, log_dirs, plugin):
     """Adjust dictionary, process all logs, return Data"""
     data = Data(name)
     # For each log dir, parse, append to the dictionary
     for log_dir in log_dirs:
-        process_logs(log_dir, data)
+        process_logs(log_dir, data, plugin)
     return data
 
-def compare(data):
+def compare(data, data_string):
     """Compare all results together, mark exceptions"""
     # Find th leaf nodes (perf/bench data)
     # Find their equivalent leaf nodes in other categories
     # Spot outliers, curve fits, significant differences
-    return data
+    return data, data_string
 
 def syntax():
     """Syntax"""
-    print("Syntax: aggregate.py benchname <logs_dir_arch1> <logs_dir_arch2> ...")
+    print("Syntax: aggregate.py [options] benchname <logs_dir_arch1> <logs_dir_arch2> ...")
+    print(" Options:")
+    print("   -p <plugin_name> : Loads class LinuxPerfPlugin in module <plugin_name>")
+    print("   -d <data_desc> : Description of the data, in positional order, in log names")
+    print("                    Example: -d threshold=1.0,outlier,cluster=2,fit=2")
+    print("                             from lognames <compiler>-<options>-<arch>-<cores>")
     sys.exit(2)
+
+def validate_plugin(plugin):
+    """Make sure we don't try to load a bogus plugin"""
+    filename = plugin + "/" + plugin + ".py"
+    if os.path.isdir(plugin) and os.path.isfile(filename):
+        raw = Path(filename).read_text()
+        if raw.find("class LinuxPerfPlugin") == -1:
+            print("Cannot find class LinuxPerfPlugin in " + filename)
+            syntax()
+    else:
+        print("Cannot find plugin " + filename)
+        syntax()
 
 def main():
     """Main"""
-    # First parameter is benchmark name
-    benchname = sys.argv[1]
+    # All options come first
+    start = 1
+    plugin = None
+    data_string = ''
+    opts, _ = getopt.getopt(sys.argv[start:], 'p:d:')
+    for opt, arg in opts:
+        if opt in ('-p', '--plugin'):
+            validate_plugin(arg)
+            plugin = arg
+            start += 2
+        elif opt in ('-d', '--data'):
+            data_string = arg
+            start += 2
+        else:
+            syntax()
+
+    # First positional parameter is benchmark name
+    if len(sys.argv) < start+1:
+        print("Missing Benchmark name")
+        syntax()
+    benchname = sys.argv[start]
     if not benchname:
         syntax()
+    start += 1
+
     # Second onward is different runs' logs (machines?)
-    log_dirs = sys.argv[2:]
+    if len(sys.argv) < start+1:
+        print("Needs at least one log directory")
+        syntax()
+    log_dirs = sys.argv[start:]
     if not log_dirs:
         syntax()
+
     # Validate input
     for log_dir in log_dirs:
         if not os.path.isdir(log_dir):
             print(log_dir + " is not a directory")
             syntax()
-    # Process all logs
-    data = process_runs(benchname, log_dirs)
-    data.summary()
+
+    # Process all logs (with plugins)
+    data = process_runs(benchname, log_dirs, plugin)
+
     # Perform all comparisons
-    compare(data)
+    data.summary()
+    compare(data, data_string)
+
     # Dump significant data (higher than threshold)
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ pytest
 echo
 echo " * Regression Tests *"
 
-out=$(python3 ./aggregate.py Lulesh x86_64)
+out=$(python3 ./aggregate.py -p lulesh Lulesh x86_64)
 
 # Records
 logs=$(echo "$out" | grep -c Logfile)
