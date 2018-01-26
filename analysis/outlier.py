@@ -73,3 +73,20 @@ class Outliers:
         self.data = self.data[np.logical_not(outliers_flags)]
 
         self.done = True
+
+    def __str__(self):
+        """Class name, for lists"""
+        return "Outliers"
+
+    def __repr__(self):
+        """Pretty-printing"""
+        string = "[ " + repr(self.threshold) + " found "
+        string += repr(len(self.outliers)) + " outliers on "
+        string += repr(len(self.data)) + " data points"
+        if self.outliers.any():
+            string += " -> ( "
+            for out in self.outliers:
+                string += repr(out[0]) + " "
+            string += ")"
+        string += " ]"
+        return string

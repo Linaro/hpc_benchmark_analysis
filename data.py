@@ -57,6 +57,17 @@ class Data:
                     pointer[cat] = dict()
                 pointer = pointer[cat]
 
+    def __str__(self):
+        """Class name, for lists"""
+        return "Data: " + self.name
+
+    def __repr__(self):
+        """Pretty-printing"""
+        string = "[ Data (" + self.name + "): "
+        string += repr(len(self.logs)) + " logs, "
+        string += repr(self.categories) + " categories ]"
+        return string
+
     def summary(self):
         """ Print a summary of the data"""
         for run in self.logs:

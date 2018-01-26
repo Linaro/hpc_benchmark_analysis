@@ -3,7 +3,9 @@
 """Testing script for Lulesh functionality"""
 
 import unittest
+import sys
 import os
+from os.path import dirname, abspath
 from pathlib import Path
 from lulesh import LinuxPerfPlugin
 
@@ -67,7 +69,7 @@ class TestLulesh(unittest.TestCase):
     def test_reading_files(self):
         """Lulesh Test / Files"""
         lul = LinuxPerfPlugin()
-        root = os.path.dirname(os.path.abspath(__file__)) + "/x86_64"
+        root = dirname(abspath(__file__)) + "/x86_64"
         for _, _, files in os.walk(root):
             for logfile in files:
                 logfile = root + '/' + logfile
@@ -96,6 +98,30 @@ class TestLulesh(unittest.TestCase):
         lul.parse('FOM = 123')
         self.assertEqual(int(lul.get_value('FOM')), 123)
         self.assertFalse(lul.get_value('Grind'))
+
+    def test_as_plugin(self):
+        """Lulesh Test / Plugin"""
+        root = dirname(dirname(abspath(__file__))) + "/linux_perf"
+        print("root = " + root)
+        sys.path.append(root)
+        import linux_perf
+        lul = LinuxPerfPlugin()
+        perf = linux_perf.LinuxPerf(plugin=lul)
+        perf.set_raw(RAW)
+        perf.parse()
+
+        energy = float(perf.get_value('FinalEnergy'))
+        self.assertEqual(energy, 2.720531e+04)
+
+        diff1 = float(perf.get_value('MaxAbsDiff'))
+        self.assertEqual(diff1, 1.591616e-12)
+
+        diff2 = float(perf.get_value('TotalAbsDiff'))
+        self.assertEqual(diff2, 1.948782e-11)
+
+        diff3 = float(perf.get_value('MaxRelDiff'))
+        self.assertEqual(diff3, 1.566182e-14)
+
 
 if __name__ == '__main__':
     unittest.main()

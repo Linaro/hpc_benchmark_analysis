@@ -48,3 +48,13 @@ class LinuxPerfPlugin:
         if self.data and key in self.data:
             return self.data[key]
         return ''
+
+    def __str__(self):
+        """Class name, for lists"""
+        return "LuleshPerfPlugin"
+
+    def __repr__(self):
+        """Pretty-printing"""
+        string = "[ Lulesh: " + repr(len(self.fields)) + " field(s), "
+        string += repr(len(self.data)) + " data points ]"
+        return string

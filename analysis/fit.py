@@ -45,3 +45,12 @@ class CurveFit:
         optr = np.polyval(optp, self.xval)
         # Assumes expected is mean of observed (see scipy)
         return float(np.sum(((optr-self.residual)**2)/np.mean(self.yval)))
+
+    def __str__(self):
+        """Class name, for lists"""
+        return "CurveFit"
+
+    def __repr__(self):
+        """Pretty-printing"""
+        string = "[ x^" + repr(self.degree) + " " + repr(self.poly) + " ]"
+        return string

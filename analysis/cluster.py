@@ -41,6 +41,14 @@ class Cluster:
         out = Outliers(self.data)
         return out.get_outliers()
 
+    def __str__(self):
+        """Class name, for lists"""
+        return "Cluster"
+
+    def __repr__(self):
+        """Pretty-printing"""
+        return "(" + repr(len(self.data)) + "@" + repr(self.centre) + ")"
+
 class Clustering:
     """Utility class to calculate clustering in data sets"""
     def __init__(self, data, max_iter=10):
@@ -91,3 +99,19 @@ class Clustering:
         for cluster in self.clusters:
             outliers.extend(cluster.get_outliers())
         return outliers
+
+    def __str__(self):
+        """Class name, for lists"""
+        return "Clustering"
+
+    def __repr__(self):
+        """Pretty-printing"""
+        string = "[ " + repr(len(self.clusters)) + " cluster(s) on "
+        string += repr(len(self.data)) + " data points"
+        if self.clusters:
+            string += " -> ( "
+            for cluster in self.clusters:
+                string += repr(cluster) + " "
+            string += ")"
+        string += " ]"
+        return string

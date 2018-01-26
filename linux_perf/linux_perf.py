@@ -36,7 +36,7 @@ class PerfData:
         self.data = dict()
         self.ext = dict()
         self.raw = None
-        self.name = None
+        self.name = ''
 
     def parse(self, results):
         """Parses the raw output, sets fields"""
@@ -70,6 +70,18 @@ class PerfData:
             self.name = name
         else:
             self.name = None
+
+    def __str__(self):
+        """Class name, for lists"""
+        return "PerfData: " + self.name
+
+    def __repr__(self):
+        """Pretty-printing"""
+        string = "[ PerfData (" + self.name + "): "
+        string += repr(len(self.fields)) + " fields, "
+        string += repr(len(self.data)) + " perf data, "
+        string += repr(len(self.ext)) + " ext data ]"
+        return string
 
 class LinuxPerf:
     """Main class, calls perf stat with some options, saves output for plugins
@@ -145,3 +157,22 @@ class LinuxPerf:
         """Sets raw results onto both out and err"""
         self.output = raw
         self.perfdata = raw
+
+    def __str__(self):
+        """Class name, for lists"""
+        return "LinuxPerf"
+
+    def __repr__(self):
+        """Pretty-printing"""
+        string = "[ "
+        if self.program:
+            string += repr(self.program) + ": "
+        else:
+            string += "<raw>: "
+        if self.plugin:
+            string += repr(self.plugin) + ", "
+        else:
+            string += "<no plugin>, "
+        string += repr(self.data) + ", "
+        string += repr(len(self.events)) + " events ]"
+        return string
