@@ -41,18 +41,18 @@ def load_analysis(plugin, data):
     mod = importlib.import_module(keyval[0])
     if keyval[0] == "outlier":
         if len(keyval) < 2:
-            raise "Outlier format is 'outlier=N'"
+            raise ValueError("Outlier format is 'outlier=N'")
         return mod.Outliers(data, keyval[1])
     elif keyval[0] == "cluster":
         if len(keyval) < 2:
-            raise "Cluster format is 'cluster=N'"
+            raise ValueError("Cluster format is 'cluster=N'")
         return mod.Clustering(data, keyval[1])
     elif keyval[0] == "fit":
         if len(keyval) < 2:
-            raise "Fit format is 'fit=N,K'"
+            raise ValueError("Fit format is 'fit=N,K'")
         return mod.CurveFit(data, data, keyval[1]) # fixme
     else:
-        raise "Invalid Analysis pass requested"
+        raise ValueError("Invalid Analysis pass requested")
 
 class Data:
     """Class that holds categories and log data in a hierarchical way"""
@@ -76,9 +76,9 @@ class Data:
             if not self.sep:
                 keyval = arg.split("=")
                 if keyval[0] != "sep":
-                    raise "First data string key should be sep"
+                    raise ValueError("First data string key should be sep")
                 if len(keyval) < 2:
-                    raise "Sep format is 'sep=c'"
+                    raise ValueError("Sep format is 'sep=c'")
                 self.sep = keyval[1]
             else:
                 self.analyses.append(load_analysis(arg, []))
@@ -89,19 +89,19 @@ class Data:
 
         # Validate input
         if not isinstance(run, str):
-            raise "A run must be a str"
+            raise TypeError("A run must be a str")
         if not isinstance(log, str):
-            raise "A log must be a str"
+            raise TypeError("A log must be a str")
         # Remove extension, split by separator
         cats = re.sub(r'\.[^-\.]+$', r'', log).split(self.sep)
         if not self.num_cat and len(cats) == 1:
             print("Warning: Mo separators in lognames. Using one category")
         if self.num_cat and len(cats) != self.num_cat:
-            raise "Different number of separators in log file names"
+            raise ValueError("Different number of separators in log file names")
         else:
             self.num_cat = len(cats)
         if self.analyses and len(cats) != len(self.analyses):
-            raise "Different number of categories and analysis in -d argument"
+            raise ValueError("Different number of categories and analysis in -d argument")
 
         # Add runs / logs to the structure
         if run not in self.logs:

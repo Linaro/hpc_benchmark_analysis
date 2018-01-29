@@ -22,7 +22,7 @@ class Cluster:
     def set_points(self, points):
         """Override data, returns true if centre changed"""
         if not isinstance(points, list):
-            raise "Cluster points must be of array type"
+            raise TypeError("Cluster points must be of array type")
         self.data = points
         changed = False
         # Cluster can have no points

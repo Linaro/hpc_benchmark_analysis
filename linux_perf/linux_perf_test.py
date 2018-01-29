@@ -122,7 +122,7 @@ class TestLinuxPerf(unittest.TestCase):
         failed = False
         try:
             Data("data", "none")
-        except:
+        except ValueError:
             failed = True
         finally:
             self.assertTrue(failed)
