@@ -61,8 +61,8 @@ class Data:
         self.analyses = list()
         self.logs = dict()
         self.sep = None
-        self.categories = 0
-        self.ext_rem = re.compile(r'\.[^-\.]+$')
+        self.num_cat = 0
+        self.num_logs = 0
         self.parse_data_string(data_string)
 
     def parse_data_string(self, data_string):
@@ -93,16 +93,17 @@ class Data:
         if not isinstance(log, str):
             raise "A log must be a str"
         # Remove extension, split by separator
-        cats = self.ext_rem.sub(r'', log).split(self.sep)
-        if not self.categories and len(cats) == 1:
+        cats = re.sub(r'\.[^-\.]+$', r'', log).split(self.sep)
+        if not self.num_cat and len(cats) == 1:
             print("Warning: Mo separators in lognames. Using one category")
-        if self.categories and len(cats) != self.categories:
+        if self.num_cat and len(cats) != self.num_cat:
             raise "Different number of separators in log file names"
+        else:
+            self.num_cat = len(cats)
         if self.analyses and len(cats) != len(self.analyses):
             raise "Different number of categories and analysis in -d argument"
 
         # Add runs / logs to the structure
-        self.categories = len(cats)
         if run not in self.logs:
             self.logs[run] = dict()
 
@@ -117,6 +118,7 @@ class Data:
                 if cat not in pointer:
                     pointer[cat] = dict()
                 pointer = pointer[cat]
+        self.num_logs += 1
 
     def __str__(self):
         """Class name, for lists"""
@@ -125,8 +127,9 @@ class Data:
     def __repr__(self):
         """Pretty-printing"""
         string = "[ Data (" + self.name + "): "
-        string += repr(len(self.logs)) + " logs, "
-        string += repr(self.categories) + " categories ]"
+        string += repr(self.num_logs) + " log(s) in "
+        string += repr(len(self.logs)) + " run(s), "
+        string += repr(self.num_cat) + " categorie(s) ]"
         return string
 
     def summary(self):
