@@ -81,12 +81,14 @@ class Outliers:
     def __repr__(self):
         """Pretty-printing"""
         string = "[ " + repr(self.threshold) + " found "
-        string += repr(len(self.outliers)) + " outliers on "
-        string += repr(len(self.data)) + " data points"
-        if self.outliers.any():
-            string += " -> ( "
-            for out in self.outliers:
-                string += repr(out[0]) + " "
-            string += ")"
+        if self.outliers:
+            string += repr(len(self.outliers)) + " outliers on "
+            if self.outliers.any():
+                string += " -> ( "
+                for out in self.outliers:
+                    string += repr(out[0]) + " "
+                string += ")"
+        if self.data:
+            string += repr(len(self.data)) + " data points"
         string += " ]"
         return string

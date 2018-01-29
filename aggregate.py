@@ -74,12 +74,20 @@ import os
 import importlib
 import getopt
 from pathlib import Path
-from data import Data
+from linux_perf.data import Data
 from linux_perf.linux_perf import LinuxPerf
+
+# Required
+sys.path.append('analysis')
+sys.path.append('linux_perf')
 
 def load_plugin(plugin):
     """Loads module in plugin/plugin.py and return LinuxPerfClass object"""
-    mod = importlib.import_module(plugin + "." + plugin)
+    root = os.path.dirname(os.path.abspath(__file__)) + "/" + plugin
+    if not os.path.isdir(root) or not os.path.isfile(root + "/" + plugin + ".py"):
+        raise ValueError(plugin + " needs to be a directory with a module inside")
+    sys.path.append(plugin)
+    mod = importlib.import_module(plugin)
     return mod.LinuxPerfPlugin()
 
 def process(log_dir, log_file, data, plugin):

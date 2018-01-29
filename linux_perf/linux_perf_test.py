@@ -6,6 +6,7 @@ import unittest
 import os
 from pathlib import Path
 from linux_perf import LinuxPerf, PerfData
+from data import Data
 
 RAW = """
  Performance counter stats for 'date':
@@ -114,6 +115,30 @@ class TestLinuxPerf(unittest.TestCase):
         self.assertTrue(lperf.get_raw())
         lperf.set_raw('')
         self.assertFalse(lperf.get_raw())
+
+    def test_data(self):
+        """Data test / Simple"""
+
+        failed = False
+        try:
+            Data("data", "none")
+        except:
+            failed = True
+        finally:
+            self.assertTrue(failed)
+
+        example = PerfData()
+        example.parse(RAW)
+        data1 = Data('data1', 'sep=-,none,outlier=1,cluster=1,fit=1')
+        data1.add_log('run1', 'bench-compiler-option-cores.log', example)
+        self.assertEqual(data1.name, 'data1')
+        self.assertEqual(data1.sep, '-')
+        self.assertEqual(data1.num_cat, 4)
+        self.assertEqual(data1.num_logs, 1)
+        self.assertEqual(data1.analyses[0], None)
+        self.assertEqual(str(data1.analyses[1]), 'Outliers')
+        self.assertEqual(str(data1.analyses[2]), 'Clustering')
+        self.assertEqual(str(data1.analyses[3]), 'CurveFit')
 
 if __name__ == '__main__':
     unittest.main()

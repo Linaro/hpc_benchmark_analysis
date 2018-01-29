@@ -33,16 +33,16 @@ import importlib
 import re
 
 def load_analysis(plugin, data):
-    """Loads module in analysis/plugin.py"""
+    """Loads module plugin.py"""
     keyval = plugin.split('=')
     if keyval[0] == "none":
         return None
 
-    mod = importlib.import_module("analysis." + keyval[0])
+    mod = importlib.import_module(keyval[0])
     if keyval[0] == "outlier":
         if len(keyval) < 2:
             raise "Outlier format is 'outlier=N'"
-        return mod.Outlier(data, keyval[1])
+        return mod.Outliers(data, keyval[1])
     elif keyval[0] == "cluster":
         if len(keyval) < 2:
             raise "Cluster format is 'cluster=N'"
