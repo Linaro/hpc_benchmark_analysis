@@ -136,9 +136,9 @@ class TestLinuxPerf(unittest.TestCase):
         self.assertEqual(data1.num_cat, 4)
         self.assertEqual(data1.num_logs, 1)
         self.assertEqual(data1.analyses[0], None)
-        self.assertEqual(str(data1.analyses[1]), 'Outliers')
-        self.assertEqual(str(data1.analyses[2]), 'Clustering')
-        self.assertEqual(str(data1.analyses[3]), 'CurveFit')
+        self.assertTrue(str(data1.analyses[1]).endswith('Outliers'))
+        self.assertTrue(str(data1.analyses[2]).endswith('Clustering'))
+        self.assertTrue(str(data1.analyses[3]).endswith('CurveFit'))
 
 if __name__ == '__main__':
     unittest.main()

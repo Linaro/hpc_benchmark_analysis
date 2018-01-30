@@ -15,8 +15,10 @@
     - Example: gcc-ofast-a57-8 -> gcc -Ofast -mcpu=A57, 8 cores
     - Example: { gcc, llvm } - { O2, O3 } - [ elapsed, cache-misses, ... ]
   * Analysis in categories are specified by data_string
-    - Example: -d sep=-,outlier=1,cluster=2,fit=3
-  * If using multiple log dirs, naming convention needs to be the same
+    - Example: -d sep=-,outlier=1/ac,cluster=2/ac,fit=3/al
+  * If using multiple log dirs, naming convention (sep,cats) needs to be the same
+  * Analysis "across" search for same category on other parent categories
+  * Analysis "along" search for all categories on the parent categories
 
  Data String format (losely documented):
   * sep=c     : single char separator in logs.
@@ -27,32 +29,77 @@
   * cluster=N : find N clusters in the data, warn if outliers
                 Warning, this algorithm includes random guesses
   * fit=N     : try to fit a polynomial of power N (least squares)
+  * ac/al     : across / along category analysis (default = across)
 """
 
 import importlib
 import re
+from enum import Enum
 
 def load_analysis(plugin, data):
     """Loads module plugin.py"""
-    keyval = plugin.split('=')
-    if keyval[0] == "none":
-        return None
 
-    mod = importlib.import_module(keyval[0])
-    if keyval[0] == "outlier":
-        if len(keyval) < 2:
-            raise ValueError("Outlier format is 'outlier=N'")
-        return mod.Outliers(data, keyval[1])
-    elif keyval[0] == "cluster":
-        if len(keyval) < 2:
-            raise ValueError("Cluster format is 'cluster=N'")
-        return mod.Clustering(data, keyval[1])
-    elif keyval[0] == "fit":
-        if len(keyval) < 2:
-            raise ValueError("Fit format is 'fit=N,K'")
-        return mod.CurveFit(data, data, keyval[1]) # fixme
+    if plugin.startswith('none'):
+        return None
+    if not isinstance(data, list):
+        raise TypeError("Data must be a list")
+
+    # split string into three parts: key=value/type
+    analysis_type = AnalysisType.across
+    split = re.match(r'([^=]+)=([^/]+)/?(.*)', plugin)
+    if not split:
+        raise ValueError("Invalid plugin format")
+    key = split.group(1)
+    if not split.group(2):
+        raise ValueError("Plugin must have at least one parameter")
+    value = split.group(2)
+    if split.group(3):
+        if split.group(3) == 'al':
+            analysis_type = AnalysisType.along
+        elif split.group(3) != 'ac':
+            raise ValueError("Invalid analysis type (must be ac/al)")
+
+    mod = importlib.import_module(key)
+    if key == "outlier":
+        return Analysis(analysis_type, mod.Outliers(data, value))
+    elif key == "cluster":
+        return Analysis(analysis_type, mod.Clustering(data, value))
+    elif key == "fit":
+        return Analysis(analysis_type, mod.CurveFit(data, data, value)) # fixme
     else:
         raise ValueError("Invalid Analysis pass requested")
+
+class AnalysisType(Enum):
+    """Analysis Type"""
+    across = 1
+    along = 2
+
+class Analysis:
+    """Simple container for analysis info to help with analysing the data"""
+    def __init__(self, analysis_type, plugin):
+        self.type = analysis_type
+        self.plugin = plugin
+        self.validate()
+
+    def validate(self):
+        """Validates the data"""
+        if not isinstance(self.type, AnalysisType):
+            raise TypeError("Analysis type must be enum(ac/al)")
+
+    def run(self, data):
+        """Runs the analysis on the data"""
+        return self.plugin(data)
+
+    def __str__(self):
+        """Class name, for lists"""
+        return "Analysis: " + str(self.type) + ' ' + str(self.plugin)
+
+    def __repr__(self):
+        """Pretty-printing"""
+        string = "[ Analysis (" + repr(self.type) + "), "
+        if self.plugin:
+            string += str(self.plugin) + " ]"
+        return string
 
 class Data:
     """Class that holds categories and log data in a hierarchical way"""
