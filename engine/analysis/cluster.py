@@ -11,7 +11,7 @@
 """
 
 import numpy as np
-from outlier import Outliers
+from analysis.outlier import Outliers
 
 class Cluster:
     """Data class with a specific cluster"""

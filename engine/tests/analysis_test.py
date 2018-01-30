@@ -4,9 +4,9 @@
 
 import unittest
 import math
-from outlier import Outliers
-from cluster import Clustering
-from fit import CurveFit
+from analysis.outlier import Outliers
+from analysis.cluster import Clustering
+from analysis.fit import CurveFit
 
 class TestAnalysis(unittest.TestCase):
     """Analysys tests"""

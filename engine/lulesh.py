@@ -3,17 +3,18 @@
  Purpose: Parses Lulesh output, provide a dictionary, plugin for linux_perf
 
  Usage:
-  lul = LuleshPerf()
-  app = LinuxPerf(['lulesh2.0', '-flag', 'etc'], lul)
+  app = LinuxPerf(['lulesh2.0', '-flag', 'etc'], lulesh.LinuxPerfPlugin())
   app.stat()
-  print app.cycles()
+  print app.get_value('cycles')
 """
 
 import re
+from linux_perf import LinuxPerfPluginBase
 
-class LinuxPerfPlugin:
+class LinuxPerfPlugin(LinuxPerfPluginBase):
     """Plugin for LinuxPerf, parses Lulesh output, return dictionary"""
     def __init__(self):
+        super().__init__()
         # Hard-coded list of perf events plus other data it spews
         # well, the ones we support at least
         self.fields = {

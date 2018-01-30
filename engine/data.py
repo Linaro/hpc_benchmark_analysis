@@ -37,7 +37,7 @@ import re
 from enum import Enum
 
 def load_analysis(plugin, data):
-    """Loads module plugin.py"""
+    """Loads analysis module from analysis/plugin.py"""
 
     if plugin.startswith('none'):
         return None
@@ -59,7 +59,7 @@ def load_analysis(plugin, data):
         elif split.group(3) != 'ac':
             raise ValueError("Invalid analysis type (must be ac/al)")
 
-    mod = importlib.import_module(key)
+    mod = importlib.import_module("analysis." + key)
     if key == "outlier":
         return Analysis(analysis_type, mod.Outliers(data, value))
     elif key == "cluster":
@@ -173,7 +173,7 @@ class Data:
 
     def __repr__(self):
         """Pretty-printing"""
-        string = "[ Data (" + self.name + "): "
+        string = "[ Data: "
         string += repr(self.num_logs) + " log(s) in "
         string += repr(len(self.logs)) + " run(s), "
         string += repr(self.num_cat) + " categorie(s) ]"
@@ -202,7 +202,6 @@ def _summary(data, padding):
 
     # Data elements are leaf nodes
     else:
-        print(padding + "Logfile: " + data.name)
         # Hardcode to get all keys for now
         for key, val in data.data.items():
             print(padding + key + " = " + val)

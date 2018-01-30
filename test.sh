@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # Horrible test driver, use something decent
+export PYTHONPATH=engine
 
 # Unit tests
 pytest
@@ -9,10 +10,10 @@ pytest
 echo
 echo " * Regression Tests *"
 
-out=$(python3 ./aggregate.py -d 'sep=-,none,none,none,fit=1' -p lulesh Lulesh x86_64)
+out=$(python3 ./aggregate.py -d 'sep=-,none,outlier=1,cluster=2,fit=3' -p lulesh Lulesh x86_64)
 
 # Records
-logs=$(echo "$out" | grep -c Logfile)
+logs=$(echo "$out" | grep -c name)
 # Perf results
 inst=$(echo "$out" | grep -c instructions)
 # Lulesh results

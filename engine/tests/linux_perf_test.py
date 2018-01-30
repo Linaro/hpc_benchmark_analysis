@@ -29,8 +29,7 @@ class TestLinuxPerf(unittest.TestCase):
     def test_raw(self):
         """LinuxPerf Test / Raw"""
         raw = LinuxPerf()
-        raw.set_raw(RAW)
-        raw.parse()
+        raw.parse(err=RAW)
 
         inst = int(raw.get_value('instructions'))
         self.assertEqual(inst, 300826)
@@ -66,8 +65,7 @@ class TestLinuxPerf(unittest.TestCase):
             for logfile in files:
                 logfile = root + '/' + logfile
                 perf = LinuxPerf()
-                perf.set_raw(Path(logfile).read_text())
-                perf.parse()
+                perf.parse(err=Path(logfile).read_text())
 
                 inst = int(perf.get_value('instructions'))
                 self.assertTrue(inst > 1000000000000)
@@ -82,16 +80,26 @@ class TestLinuxPerf(unittest.TestCase):
 
     def test_errors(self):
         """LinuxPerf Test / Errors"""
+
+        failed = False
+
         ## PerfData
         pdata = PerfData()
-        result = pdata.parse(['123 instructions', '321 cycles'])
-        self.assertFalse(result)
+        try:
+            pdata.parse(['123 instructions', '321 cycles'])
+        except TypeError:
+            failed = True
+        finally:
+            self.assertTrue(failed)
+            failed = False
 
-        pdata.append(['123 instructions', '321 cycles'])
-        self.assertFalse(pdata.ext)
-
-        pdata.set_name(['123 instructions', '321 cycles'])
-        self.assertFalse(pdata.name)
+        try:
+            pdata.append(['123 instructions', '321 cycles'])
+        except TypeError:
+            failed = True
+        finally:
+            self.assertTrue(failed)
+            failed = False
 
         ## LinuxPerf
         lperf = LinuxPerf()
@@ -103,18 +111,21 @@ class TestLinuxPerf(unittest.TestCase):
         lperf.append_argument(['bar', 'baz'])
         self.assertEqual(lperf.program, ['foo', 'bar', 'baz'])
 
-        lperf.set_raw('123 456 789')
-        lperf.parse()
+        lperf.parse(err='123 456 789')
         self.assertFalse(lperf.get_value('instructions'))
 
-        lperf.set_raw('123 instructions')
-        lperf.parse()
+        lperf.parse(err='123 instructions')
         self.assertEqual(int(lperf.get_value('instructions')), 123)
         self.assertFalse(lperf.get_value('cycles'))
-
         self.assertTrue(lperf.get_raw())
-        lperf.set_raw('')
-        self.assertFalse(lperf.get_raw())
+
+        failed = False
+        try:
+            lperf.parse(err='')
+        except ValueError:
+            failed = True
+        finally:
+            self.assertTrue(failed)
 
     def test_data(self):
         """Data test / Simple"""

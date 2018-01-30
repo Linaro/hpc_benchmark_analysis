@@ -3,10 +3,10 @@
 """Testing script for Lulesh functionality"""
 
 import unittest
-import sys
 import os
 from os.path import dirname, abspath
 from pathlib import Path
+from linux_perf import LinuxPerf
 from lulesh import LinuxPerfPlugin
 
 RAW = """Running problem size 10^3 per domain until completion
@@ -101,14 +101,9 @@ class TestLulesh(unittest.TestCase):
 
     def test_as_plugin(self):
         """Lulesh Test / Plugin"""
-        root = dirname(dirname(abspath(__file__))) + "/linux_perf"
-        print("root = " + root)
-        sys.path.append(root)
-        import linux_perf
         lul = LinuxPerfPlugin()
-        perf = linux_perf.LinuxPerf(plugin=lul)
-        perf.set_raw(RAW)
-        perf.parse()
+        perf = LinuxPerf(plugin=lul)
+        perf.parse(RAW)
 
         energy = float(perf.get_value('FinalEnergy'))
         self.assertEqual(energy, 2.720531e+04)

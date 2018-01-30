@@ -74,20 +74,24 @@ import os
 import importlib
 import getopt
 from pathlib import Path
-from linux_perf.data import Data
-from linux_perf.linux_perf import LinuxPerf
+from engine.data import Data
+from engine.linux_perf import LinuxPerf
 
-# Required
-sys.path.append('analysis')
-sys.path.append('linux_perf')
+def validate_plugin(plugin):
+    """Make sure we don't try to load a bogus plugin"""
+    filename = "engine/" + plugin + ".py"
+    if os.path.isfile(filename):
+        raw = Path(filename).read_text()
+        if raw.find("class LinuxPerfPlugin") == -1:
+            print("Cannot find class LinuxPerfPlugin in " + filename)
+            syntax()
+    else:
+        print("Cannot find plugin " + filename)
+        syntax()
 
 def load_plugin(plugin):
-    """Loads module in plugin/plugin.py and return LinuxPerfClass object"""
-    root = os.path.dirname(os.path.abspath(__file__)) + "/" + plugin
-    if not os.path.isdir(root) or not os.path.isfile(root + "/" + plugin + ".py"):
-        raise ValueError(plugin + " needs to be a directory with a module inside")
-    sys.path.append(plugin)
-    mod = importlib.import_module(plugin)
+    """Loads module in engine/plugin.py and return LinuxPerfClass object"""
+    mod = importlib.import_module("engine." + plugin)
     return mod.LinuxPerfPlugin()
 
 def process(log_dir, log_file, data, plugin):
@@ -98,8 +102,7 @@ def process(log_dir, log_file, data, plugin):
     app = LinuxPerf(plugin=plugin)
     # Open log file, pass it to LinuxPerf, parse
     raw = Path(log_dir + "/" + log_file).read_text()
-    app.set_raw(raw)
-    results = app.parse()
+    results = app.parse(raw, raw)
     # Collect parsed data, push into Data
     data.add_log(log_dir, log_file, results)
 
@@ -136,18 +139,6 @@ def syntax():
     print("                    Example: -d sep=-,outlier=1.0,cluster=2,fit=2")
     print("                             from lognames <compiler>-<options>-<arch>-<cores>")
     sys.exit(2)
-
-def validate_plugin(plugin):
-    """Make sure we don't try to load a bogus plugin"""
-    filename = plugin + "/" + plugin + ".py"
-    if os.path.isdir(plugin) and os.path.isfile(filename):
-        raw = Path(filename).read_text()
-        if raw.find("class LinuxPerfPlugin") == -1:
-            print("Cannot find class LinuxPerfPlugin in " + filename)
-            syntax()
-    else:
-        print("Cannot find plugin " + filename)
-        syntax()
 
 def main():
     """Main"""
