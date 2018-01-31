@@ -36,6 +36,5 @@ Major features missing:
 * Actually use scipy statistical analysis modules instead of home-brewed
 
 A few known issues:
-* Clustering is using random centres, need to be more stable
 * Analysis plugins are not all behaving the same, need to have a common base class
 * PYTHONPATH needs to contain the _engine_ directory for now, needs a proper package structure

@@ -45,27 +45,17 @@ class TestAnalysis(unittest.TestCase):
         # One additional distribution
         new = list()
         for dat in data:
+            new.append(dat-3)
             new.append(dat+3)
         data.extend(new)
 
         clustering = Clustering(data)
-        clusters = clustering.kmeans(2)
-        self.assertEqual(len(clusters), 2)
+        clusters = clustering.kmeans(3)
+        self.assertEqual(len(clusters), 3)
 
-        # Clustering involves randomness, and this example exhibits two behaviours
-        # (float('nan'), 1.42211049375),
-        # (-0.07788950625, 2.92211049375)
-        match = False
-        for idx, cluster in enumerate(clusters):
-            if (math.isnan(cluster.centre) and
-                    clusters[1-idx].centre == 1.42211049375):
-                match = True
-                break
-            if (cluster.centre == -0.07788950625 and
-                    clusters[1-idx].centre == 2.92211049375):
-                match = True
-                break
-        self.assertTrue(match)
+        self.assertEqual(clusters[0].centre, -3.07788950625)
+        self.assertEqual(clusters[1].centre, -0.07788950625)
+        self.assertEqual(clusters[2].centre, 2.92211049375)
 
     def test_clustering_outlier(self):
         """Clustering Test / Outlier"""

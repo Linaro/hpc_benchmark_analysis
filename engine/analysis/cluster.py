@@ -59,10 +59,12 @@ class Clustering:
 
     def kmeans(self, num_clusters=1):
         """Find K clusters"""
-        # Create K random centres
-        for cent in range(num_clusters):
-            self.clusters.append(Cluster(np.random.randint(np.min(self.data),
-                                                           np.max(self.data))))
+        # Create K exclusive equidistant centres (x o o o x)
+        centres = np.linspace(np.min(self.data), np.max(self.data),
+                              num_clusters+1, False)
+        centres = np.delete(centres, 0) # avoid first outlier
+        for cent in centres:
+            self.clusters.append(Cluster(cent))
         # List of points and centres they belong to
         belongs = np.zeros(len(self.data), np.int)
 
