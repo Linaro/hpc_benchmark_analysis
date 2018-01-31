@@ -35,6 +35,7 @@
 import importlib
 import re
 from enum import Enum
+from analysis.base import AnalysisBase
 
 def load_analysis(plugin, data):
     """Loads analysis module from analysis/plugin.py"""
@@ -47,12 +48,16 @@ def load_analysis(plugin, data):
     # split string into three parts: key=value/type
     analysis_type = AnalysisType.across
     split = re.match(r'([^=]+)=([^/]+)/?(.*)', plugin)
+    # Plugin name
     if not split:
         raise ValueError("Invalid plugin format")
     key = split.group(1)
+    # Options
     if not split.group(2):
         raise ValueError("Plugin must have at least one parameter")
     value = split.group(2)
+    options = {'value': value} # fixme
+    # Type
     if split.group(3):
         if split.group(3) == 'al':
             analysis_type = AnalysisType.along
@@ -61,11 +66,11 @@ def load_analysis(plugin, data):
 
     mod = importlib.import_module("analysis." + key)
     if key == "outlier":
-        return Analysis(analysis_type, mod.Outliers(data, value))
+        return Analysis(analysis_type, mod.Outliers(options))
     elif key == "cluster":
-        return Analysis(analysis_type, mod.Clustering(data, value))
+        return Analysis(analysis_type, mod.Clustering(options))
     elif key == "fit":
-        return Analysis(analysis_type, mod.CurveFit(data, data, value)) # fixme
+        return Analysis(analysis_type, mod.CurveFit(options))
     else:
         raise ValueError("Invalid Analysis pass requested")
 
@@ -77,18 +82,25 @@ class AnalysisType(Enum):
 class Analysis:
     """Simple container for analysis info to help with analysing the data"""
     def __init__(self, analysis_type, plugin):
+        if not isinstance(analysis_type, AnalysisType):
+            raise TypeError("Analysis type must be enum(ac/al)")
+        if not isinstance(plugin, AnalysisBase):
+            raise TypeError("Analysis plugin must derive from AnalysisBase")
         self.type = analysis_type
         self.plugin = plugin
-        self.validate()
-
-    def validate(self):
-        """Validates the data"""
-        if not isinstance(self.type, AnalysisType):
-            raise TypeError("Analysis type must be enum(ac/al)")
 
     def run(self, data):
         """Runs the analysis on the data"""
-        return self.plugin(data)
+        self.plugin.set_data(data)
+        self.plugin.run()
+
+    def set_option(self, key, value):
+        """Sets the plugin's option"""
+        self.plugin.set_option(key, value)
+
+    def get_value(self, key):
+        """Get the plugin's value"""
+        return self.plugin.get_value(key)
 
     def __str__(self):
         """Class name, for lists"""

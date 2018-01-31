@@ -3,7 +3,6 @@
 """Testing script for Outlier/Curve fit functionality"""
 
 import unittest
-import math
 from analysis.outlier import Outliers
 from analysis.cluster import Clustering
 from analysis.fit import CurveFit
@@ -22,17 +21,23 @@ class TestAnalysis(unittest.TestCase):
         for out in expected_outliers:
             data.append(out[0])
 
-        out = Outliers(data)
-        ave, dev = out.get_stats()
+        out = Outliers()
+        out.set_data(data)
+        ave = out.get_value('mean')
+        dev = out.get_value('stdev')
         self.assertEqual(ave, -0.06231160500000001)
         self.assertEqual(dev, 2.2569022689792186)
 
-        out.find_outliers()
-        self.assertEqual(out.num_outliers(), 2)
-        self.assertEqual(out.get_outliers(), expected_outliers)
+        out.run()
+
+        num_outliers = out.get_value('num_outliers')
+        outliers = out.get_value('outliers')
+        self.assertEqual(num_outliers, 2)
+        self.assertEqual(outliers, expected_outliers)
         self.assertEqual(len(out.get_data()), 8)
 
-        ave, dev = out.get_stats()
+        ave = out.get_value('mean')
+        dev = out.get_value('stdev')
         self.assertEqual(ave, -0.07788950625)
         self.assertEqual(dev, 0.3402887885570986)
 
@@ -49,8 +54,11 @@ class TestAnalysis(unittest.TestCase):
             new.append(dat+3)
         data.extend(new)
 
-        clustering = Clustering(data)
-        clusters = clustering.kmeans(3)
+        clustering = Clustering()
+        clustering.set_data(data)
+        clustering.set_option('num_clusters', 3)
+        clustering.run()
+        clusters = clustering.get_value('clusters')
         self.assertEqual(len(clusters), 3)
 
         self.assertEqual(clusters[0].centre, -3.07788950625)
@@ -68,8 +76,11 @@ class TestAnalysis(unittest.TestCase):
         for out in expected_outliers:
             data.append(out[0])
 
-        clustering = Clustering(data)
-        clusters = clustering.kmeans(1)
+        clustering = Clustering()
+        clustering.set_data(data)
+        clustering.set_option('num_clusters', 1)
+        clustering.run()
+        clusters = clustering.get_value('clusters')
         self.assertEqual(len(clusters), 1)
 
         self.assertEqual(clusters[0].centre, -0.06231160500000001)
@@ -82,25 +93,29 @@ class TestAnalysis(unittest.TestCase):
         xval = [0, 1, 2, 3, 4, 5]
         # Linear points
         linear = [.1, .9, 1.85, 2.77, 3.69, 4.54]
-        linfit = CurveFit(xval, linear)
-        linfit.fit()
-        self.assertEqual(linfit.poly[1], 0.0590476190476186)
-        self.assertEqual(linfit.poly[0], 0.8997142857142856)
-        optimal = xval # linear
-        self.assertEqual(linfit.quality(optimal), 0.17173347086126853)
+        linfit = CurveFit({'degree': 1, 'optimal': xval})
+        linfit.set_data(linear)
+        linfit.run()
+        poly = linfit.get_value('poly')
+        self.assertEqual(poly[1], 0.0590476190476186)
+        self.assertEqual(poly[0], 0.8997142857142856)
+        self.assertEqual(linfit.get_value('quality'), 0.17173347086126853)
 
         # Quadractic
         quad = [.2, 1.1, 3.98, 8.88, 15.4, 24.2]
-        quadfit = CurveFit(xval, quad, 2)
-        quadfit.fit()
-        self.assertEqual(quadfit.poly[2], 0.1921428571428483)
-        self.assertEqual(quadfit.poly[1], -0.03249999999999286)
-        self.assertEqual(quadfit.poly[0], 0.9653571428571415)
         optimal = [0, 1, 4, 9, 16, 25]
-        self.assertEqual(quadfit.quality(optimal), 0.11625478316326478)
+        quadfit = CurveFit({'degree':2, 'xaxix':xval, 'optimal':optimal})
+        quadfit.set_data(quad)
+        quadfit.run()
+        poly = quadfit.get_value('poly')
+        self.assertEqual(poly[2], 0.1921428571428483)
+        self.assertEqual(poly[1], -0.03249999999999286)
+        self.assertEqual(poly[0], 0.9653571428571415)
+        self.assertEqual(quadfit.get_value('quality'), 0.11625478316326478)
 
         # Comparison between linear and quad should be bad
-        self.assertEqual(quadfit.quality(xval), 59.94661192602033)
+        quadfit.set_option('optimal', xval)
+        self.assertEqual(quadfit.get_value('quality'), 59.94661192602033)
 
 
 if __name__ == '__main__':

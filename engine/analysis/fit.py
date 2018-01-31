@@ -12,39 +12,63 @@
 """
 
 import numpy as np
+from analysis.outlier import AnalysisBase
 
-class CurveFit:
+class CurveFit(AnalysisBase):
     """Curve Fit"""
-    def __init__(self, x, y, degree=1):
-        if not isinstance(x, list):
-            raise TypeError("X must be a list")
-        if not isinstance(y, list):
-            raise TypeError("Y must be a list")
-        if len(x) != len(y):
-            raise ValueError("X and Y must have same length")
-
-        self.xval = np.array(x)
-        self.yval = np.array(y)
-        self.degree = degree
+    def __init__(self, options):
+        super().__init__(options)
         self.residual = None
         self.poly = None
 
-    def fit(self):
-        """Poly fit"""
-        self.poly = np.polyfit(self.xval, self.yval, self.degree)
-        self.residual = np.polyval(self.poly, self.xval)
+    def _xaxis(self):
+        if 'xaxis' in self.options:
+            xaxis = self.options['xaxis']
+            if not isinstance(self.data, list) or len(self.data) != len(xaxis):
+                raise ValueError("'xaxis' must have the same length as data")
+        else:
+            xaxis = np.linspace(0, len(self.data)-1, len(self.data), dtype=int)
+        return xaxis
 
-    def quality(self, optimal):
-        """Compares the current fit to the expected 'optimal'
+    def _quality(self):
+        """Compares the current fit to the self.data 'optimal'
            The higher the value, the worse the fit is"""
+        if 'optimal' not in self.options:
+            return 0.0
+        optimal = self.options['optimal']
         if not isinstance(optimal, list):
             raise TypeError("Optimal must be a list")
-        if len(self.xval) != len(optimal):
-            raise ValueError("X and optimal must have same length")
-        optp = np.polyfit(self.xval, optimal, self.degree)
-        optr = np.polyval(optp, self.xval)
-        # Assumes expected is mean of observed (see scipy)
-        return float(np.sum(((optr-self.residual)**2)/np.mean(self.yval)))
+        xaxis = self._xaxis()
+        if len(xaxis) != len(optimal):
+            raise ValueError("'xaxis' and optimal must have same length")
+        degree = self.options['degree']
+        optp = np.polyfit(xaxis, optimal, degree)
+        optr = np.polyval(optp, xaxis)
+        # Assumes self.data is mean of observed (see scipy)
+        residual = self.results['residual']
+        return float(np.sum(((optr-residual)**2)/np.mean(self.data)))
+
+    def _run(self):
+        """Poly fit"""
+        if 'degree' not in self.options:
+            raise RuntimeError("Curve fit needs 'degree' options set")
+        degree = self.options['degree']
+        if not isinstance(degree, int) or degree < 1:
+            raise ValueError("degree must be integer > 1")
+
+        xaxis = self._xaxis()
+        poly = np.polyfit(xaxis, self.data, degree)
+        residual = np.polyval(poly, xaxis)
+
+        self.results['poly'] = poly
+        self.results['residual'] = residual
+        self.results['quality'] = self._quality()
+
+    def get_value(self, key):
+        """Specialise to recalculate quality, optimal may have changed"""
+        if key == 'quality' and self.done:
+            self.results['quality'] = self._quality()
+        return super().get_value(key)
 
     def __str__(self):
         """Class name, for lists"""
@@ -52,5 +76,5 @@ class CurveFit:
 
     def __repr__(self):
         """Pretty-printing"""
-        string = "[ x^" + repr(self.degree) + " " + repr(self.poly) + " ]"
+        string = "[ " + repr(self.poly) + ", " + repr(self.residual) + " ]"
         return string
