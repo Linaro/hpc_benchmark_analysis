@@ -34,11 +34,22 @@ class Outliers(AnalysisBase):
         # We store the stdev on the second axis
         if len(self.data.shape) == 1:
             self.data = self.data[:, None]
+        self._update_stats()
+
+    def _update_stats(self):
         self.results['mean'] = np.mean(self.data)
         self.results['stdev'] = np.std(self.data)
+        # When only two points, also record the scale (0->1)
+        if len(self.data) == 2:
+            self.results['scale'] = float(self.data[1] / self.data[0])
 
     def _run(self):
         """MED based outlier test (better than percentile, see source)"""
+        # Small datasets can't have outlers
+        if len(self.data) < 3:
+            self.done = True
+            return
+
         # G = MAX(Xi - Xmed)/dev
         median = np.median(self.data, axis=0)
         diff = np.sqrt(np.sum((self.data - median)**2, axis=-1))
@@ -56,8 +67,7 @@ class Outliers(AnalysisBase):
 
         # Remove outliers from data
         self.data = self.data[np.logical_not(outliers_flags)]
-        self.results['mean'] = np.mean(self.data)
-        self.results['stdev'] = np.std(self.data)
+        self._update_stats()
 
         self.done = True
 
@@ -67,7 +77,7 @@ class Outliers(AnalysisBase):
 
     def __repr__(self):
         """Pretty-printing"""
-        string = "[ " + repr(self.results['threshold']) + " found "
+        string = "[ threshold: " + repr(self.options['threshold']) + ", "
         if 'outliers' in self.results:
             string += repr(len(self.results['outliers'])) + " outliers on "
             if self.results['outliers']:

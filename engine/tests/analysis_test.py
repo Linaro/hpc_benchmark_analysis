@@ -41,6 +41,21 @@ class TestAnalysis(unittest.TestCase):
         self.assertEqual(ave, -0.07788950625)
         self.assertEqual(dev, 0.3402887885570986)
 
+    def test_outlier_small(self):
+        """Outlier Test / Smal"""
+
+        # A data too smal to have outliers
+        out = Outliers()
+        out.set_data([1., 2.])
+        ave = out.get_value('mean')
+        self.assertEqual(ave, 1.5)
+        dev = out.get_value('stdev')
+        self.assertEqual(dev, 0.5)
+        scale = out.get_value('scale')
+        self.assertEqual(scale, 2.0)
+        outliers = out.get_value('outliers')
+        self.assertEqual(outliers, '')
+
     def test_clustering_simple(self):
         """Clustering Test / Simple"""
 
