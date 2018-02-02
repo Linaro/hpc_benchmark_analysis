@@ -16,7 +16,9 @@ Again, this needs to be resilient, so the sets will be stored in a format that w
 
 Also, the last category will have the data in dictionary form (created by the parsers: perf, benchmark plugins, yaml files, etc). That data should *also* be the same (same keys, case-sesitive), or the analysis will ignore them and end up empty, too.
 
-## Across / Along analysis
+## Analyses
+
+### Across / Along analysis
 
 The key to this method is indicating what categories (say compiler, options, number of cores) is to be measured across (for different compilers, pick all -O3 runs) or along (for the same compiler/option, compare different number of cores). Obviously, the analysis to be done in each case are different. Most likely, across analysis will end up being clustering, detecting outliers or just measuring compatibility via standard deviation/mean distances, while along analysis are more likely curve fitting and fit quality testing.
 
@@ -42,6 +44,14 @@ Each group has its own mean-stdev / fit-quality, which are, themselves, data tha
 
 The same is true for the core analysis, as each fit has a quality measure (we assume towards the same fit - number of cores), so they can also be clustered and outliers can be found.
 
+### Scalability
+
+For a single value per category, this analysis is somewhat pointless, as it's not hard for humans to look at a spreadsheet and spot the big differences, especially if one plots a single _improvement_ number for each category by dividing one run for the other (say, gcc/llvm).
+
+However, one would have to do the same for O2/O3, and every other list of categories. Also, if there are more than two items in each category (say gcc5, gcc7, llvm4, llvm5), then the analysis becomes non-trivial. Curve fits (and quality analysis) is even harder for humans to objectively state.
+
+Furthermore, many benchmarks have small variations (like problem size, type size, resolution), which increase the amount of data to analyse. Users may also want to run benchmarks through profilers, to collect system information like cache and branch misses, instruction profiling, etc. It's not unreasonable to expect a dozen or two datapoints for **every** category.
+
 ## Returning results
 
 There are two important results that can come out of an analysis like this: data visualisation and outlier detection.
@@ -52,6 +62,6 @@ For each set, group and super-groups, we can plot the graphs, with standard devi
 
 An addition dump of the data can be interesting for evolution analysis, trend/spike detection, etc. Those analysis can already be done by tools like LLVM's LNT infrastructure, and converting the data to their format would be an interesting plugin to add.
 
-## Outlier Detection
+### Outlier Detection
 
 However, perhaps the most powerful result would be printing the biggest outliers of the dataset. This cna be done simply by printing a list at the end of the run, and when done on dispatchers (like Jenkins, Travis or Buildbots), it would be at the very end of the log, being very easy to spot anomalies and comparing to previous runs.
