@@ -4,7 +4,7 @@ These modules are built to automatically discover outliers on multi-dimensional 
 
 ## Flexibility
 
-Flexibility is about how each analysis plugin operates. They need to require little to no input other than the data itself, and output as much as it can about its own internal processes (ex. hoe many clusters it found, what were the outliers, etc). In the current design, the base plugin has two methods: `set_option` and `get_value`, respectively, input and output.
+Flexibility is about how each analysis plugin operates. They need to require little to no input other than the data itself, and output as much as it can about its own internal processes (ex. how many clusters it found, what were the outliers, etc). In the current design, the base plugin has two methods: `set_option` and `get_value`, respectively, input and output.
 
 The plugins need to be resilient to input, though. If no fixed number of clusters or polynomial degree is passed, then try a few and pick the best value (closest grouping, lowest deviation, best fit, etc), then save on results all of the decisions, so that users can grab those via `get_value`.
 
