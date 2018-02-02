@@ -64,4 +64,4 @@ An addition dump of the data can be interesting for evolution analysis, trend/sp
 
 ### Outlier Detection
 
-However, perhaps the most powerful result would be printing the biggest outliers of the dataset. This cna be done simply by printing a list at the end of the run, and when done on dispatchers (like Jenkins, Travis or Buildbots), it would be at the very end of the log, being very easy to spot anomalies and comparing to previous runs.
+However, perhaps the most powerful result would be printing the biggest outliers of the dataset. This can be done simply by printing a list at the end of the run, and when done on dispatchers (like Jenkins, Travis or Buildbots), it would be at the very end of the log, being very easy to spot anomalies and comparing to previous runs.
