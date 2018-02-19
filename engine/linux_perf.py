@@ -17,6 +17,8 @@
 
 import subprocess
 import re
+from pathlib import Path
+import shutil
 
 class LinuxPerfPluginBase:
     """Base class for all linux_perf plugins"""
@@ -127,9 +129,20 @@ class LinuxPerf:
         else:
             self.program.append(argument)
 
+    def perf_command(self):
+        # Verify that perf is actually installed
+        command = shutil.which('perf')
+        if not command:
+            raise RuntimeError("Perf is not installed")
+        # Check that you have permissions to do anything
+        CAP_SYS_ADMIN = Path('/proc/sys/kernel/perf_event_paranoid').read_text()
+        if int(CAP_SYS_ADMIN) >= 3:
+            raise RuntimeError("Can't run perf with CAP_SYS_ADMIN higher than 2")
+        return command
+
     def stat(self, repeat=1, events=None):
         """Runs perf stat on the process, saving the output"""
-        call = ['perf', 'stat']
+        call = [self.perf_command(), 'stat']
         # Repeat the run N times, reports stdev
         if repeat > 1:
             call.extend(['-r', repeat])
