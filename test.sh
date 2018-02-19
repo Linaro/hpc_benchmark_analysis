@@ -4,7 +4,7 @@
 export PYTHONPATH=engine
 
 # Unit tests
-pytest
+python3 -m pytest
 
 # "Regression" tests
 echo
